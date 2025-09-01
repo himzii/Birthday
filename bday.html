@@ -62,23 +62,15 @@
       from { transform: translateX(-50%) scale(1); opacity: 0.9; }
       to { transform: translateX(-50%) scale(1.2); opacity: 0.6; }
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    .message {
-      margin-top: 20px;
-      font-size: 1.2em;
-      color: gold;
-      display: none;
-    }
+    .message { margin-top: 20px; font-size: 1.2em; color: gold; display: none; }
   </style>
 </head>
 <body>
 
 <div class="timer">
-  <h1 id="countdown">30:00</h1>
+  <h1 id="countdown">00:00:00</h1>
   <p>Waiting for midnight surprise 🎁</p>
 </div>
 
@@ -96,25 +88,38 @@
 <canvas id="confetti"></canvas>
 
 <script>
-  // TIMER (30 minutes = 1800 seconds)
-  let timeLeft = 1800;
-  let countdownEl = document.getElementById("countdown");
-  let timerInterval = setInterval(() => {
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
-    countdownEl.textContent = 
-      `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
-    timeLeft--;
+  // TIMER SYNCED TO IST MIDNIGHT
+  function updateTimer() {
+    const now = new Date();
+    // convert current time to IST
+    const utc = now.getTime() + now.getTimezoneOffset()*60000;
+    const istOffset = 5.5 * 60 * 60000; // +5:30
+    const istTime = new Date(utc + istOffset);
 
-    if (timeLeft < 0) {
-      clearInterval(timerInterval);
+    const midnight = new Date(istTime);
+    midnight.setHours(24,0,0,0); // next IST midnight
+    const diff = midnight - istTime;
+
+    if(diff <= 0) {
       document.querySelector(".timer").style.display = "none";
       document.querySelector(".birthday").style.display = "block";
       startConfetti();
+      clearInterval(timerInterval);
+      return;
     }
-  }, 1000);
 
-  // CONFETTI 🎉
+    let hours = Math.floor(diff/1000/3600);
+    let minutes = Math.floor((diff/1000%3600)/60);
+    let seconds = Math.floor((diff/1000)%60);
+
+    document.getElementById("countdown").textContent =
+      `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+  }
+
+  updateTimer();
+  const timerInterval = setInterval(updateTimer,1000);
+
+  // CONFETTI
   const canvas = document.getElementById("confetti");
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;
@@ -146,7 +151,7 @@
     requestAnimationFrame(animateConfetti);
   }
 
-  // Blow Candle 🎂
+  // Blow Candle
   function blowCandle() {
     let flame = document.getElementById("flame");
     let msg = document.getElementById("candleMsg");
