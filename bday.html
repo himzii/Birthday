@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday Deepanshu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      overflow: hidden;
+    }
+    .timer, .birthday {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .timer h1 {
+      font-size: 3em;
+    }
+    .birthday {
+      display: none;
+      animation: fadeIn 2s ease-in forwards;
+    }
+    .birthday h1 {
+      font-size: 3em;
+      color: #ff4081;
+      margin-bottom: 20px;
+    }
+    .cake {
+      width: 200px;
+      height: 200px;
+      background: pink;
+      border-radius: 10px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .candle {
+      width: 10px;
+      height: 50px;
+      background: yellow;
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+    }
+    .flame {
+      width: 20px;
+      height: 20px;
+      background: orange;
+      border-radius: 50%;
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: flicker 0.5s infinite alternate;
+    }
+    @keyframes flicker {
+      from { transform: translateX(-50%) scale(1); opacity: 0.9; }
+      to { transform: translateX(-50%) scale(1.2); opacity: 0.6; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: gold;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="timer">
+  <h1 id="countdown">30:00</h1>
+  <p>Waiting for midnight surprise 🎁</p>
+</div>
+
+<div class="birthday">
+  <h1>🎉 Happy Birthday Deepanshu 🎂</h1>
+  <div class="cake">
+    <div class="candle" onclick="blowCandle()">
+      <div class="flame" id="flame"></div>
+    </div>
+  </div>
+  <p>My love, my blessing, my everything 💖</p>
+  <p class="message" id="candleMsg">✨ You blew the candles! ✨</p>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+  // TIMER (30 minutes = 1800 seconds)
+  let timeLeft = 1800;
+  let countdownEl = document.getElementById("countdown");
+  let timerInterval = setInterval(() => {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+    countdownEl.textContent = 
+      `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(timerInterval);
+      document.querySelector(".timer").style.display = "none";
+      document.querySelector(".birthday").style.display = "block";
+      startConfetti();
+    }
+  }, 1000);
+
+  // CONFETTI 🎉
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confettis = [];
+  function Confetti() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height - canvas.height;
+    this.size = Math.random() * 8 + 4;
+    this.speed = Math.random() * 3 + 2;
+    this.color = `hsl(${Math.random()*360},100%,50%)`;
+  }
+  function startConfetti() {
+    for (let i = 0; i < 300; i++) confettis.push(new Confetti());
+    animateConfetti();
+  }
+  function animateConfetti() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    confettis.forEach(c => {
+      ctx.fillStyle = c.color;
+      ctx.fillRect(c.x, c.y, c.size, c.size);
+      c.y += c.speed;
+      if (c.y > canvas.height) {
+        c.y = -c.size;
+        c.x = Math.random() * canvas.width;
+      }
+    });
+    requestAnimationFrame(animateConfetti);
+  }
+
+  // Blow Candle 🎂
+  function blowCandle() {
+    let flame = document.getElementById("flame");
+    let msg = document.getElementById("candleMsg");
+    if (flame) {
+      flame.style.transition = "opacity 1s";
+      flame.style.opacity = "0";
+      setTimeout(() => { flame.remove(); msg.style.display = "block"; }, 1000);
+    }
+  }
+</script>
+</body>
+</html>
